@@ -1,0 +1,48 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %}Social Network{% endblock %}</title>
+        <link rel="icon" href="{% static 'icons/a.svg' %}" type="image/svg+xml">
+
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="{% static 'network/styles.css' %}" rel="stylesheet">
+    </head>
+    <body class="flex relative">
+        <div class="overlay" id="overlay"></div>
+            <!-- Sidebar -->
+            <nav class="Sidebar">
+                <a href="{% url 'index' %}" class="text-xl font-bold block mb-6">
+                    <img class="w-10 h-10" src="../../static/icons/a.svg">
+                </a>
+                {% if user.is_authenticated %}
+                    <div class="flex flex-col space-y-4">
+                        <a href="{% url 'follow' %}" class="hover:text-blue-500">
+                            <img class="w-8 h-8" src="../../static/icons/follow.svg">
+                        </a>
+                    </div>
+                    <div class="flex flex-col space-y-4">
+                        <a href="{% url 'profile' user.id %}" class="hover:text-blue-500 font-semibold">
+                            <img class="w-8 h-8" src="../../static/icons/user.svg">
+                        </a>
+                        <a href="{% url 'logout' %}" class="text-red-600 hover:text-red-800">
+                            <img class="w-8 h-8" src="../../static/icons/logout.svg">
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="flex flex-col space-y-4">
+                        <a href="{% url 'login' %}" class="hover:text-blue-500">Log In</a>
+                        <a href="{% url 'register' %}" class="hover:text-blue-500">Register</a>
+                    </div>
+                {% endif %}
+            </nav>            
+
+
+            <!-- Main Content -->
+            <div class="Content">
+                {% block body %}
+                {% endblock %}
+            </div>
+    </body>
+</html>

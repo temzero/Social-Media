@@ -1,0 +1,77 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+
+    <h1 class="text-2xl font-bold mb-4">
+       Profile
+    </h1>
+
+    <div class="posts">
+        <div class="profile">
+            <div class="flex justify-between">
+                <div class="font-bold italic text-3xl">{{ profileUser.username }}</div>
+
+                {% if user.id != profileUser.id %}
+                    {% if followed %}
+                        <a href="{% url 'makeFollow' follower_id=profileUser.id type='unfollow' %}" class="button">Unfollow</a>
+                    {% else %}
+                        <a href="{% url 'makeFollow' follower_id=profileUser.id type='follow' %}" class="button">Follow</a>
+                    {% endif %}
+                {% endif %}
+                
+            </div>
+            <div>{{ profileUser.email }}</div>
+            <div class="flex gap-4 mt-4">
+                <div>{{followed.count}} following</div>
+                <div>{{followers.count}} followers</div>
+            </div>
+        </div>
+        <div class="profile flex justify-between items-end  font-semibold ">
+            <h1 class="text-2xl">All Posts:</h1>
+            <h2 class="text-xl">{{posts|length}}</h2>
+        </div>
+        {% for post in posts %}
+            <div class="post" id="{{ post.id }}">
+                <div class="flex justify-between">
+                    <h1 class="post-username italic">@{{post.user}}</h1>
+                    <h3 class="post-time text-sm text-gray-400">{{ post.time_ago }}</h3>
+                </div>
+                <h1 class="post-content mt-2 mb-6">{{post.content}}</h1>
+                <div class="flex gap-4 items-center justify-between">
+                    <a class="hover:opacity-80 cursor-pointer flex items-center" onclick="event.stopPropagation(); alert('Liked!');">
+                        <img class="h-6 w-6 self-start" src="../../static/icons/heart.svg" alt="Like">
+                    </a>
+                    <div class="flex gap-4">
+                        <a class="hover:opacity-80 cursor-pointer flex items-center" onclick="event.stopPropagation(); alert('Share!');">
+                            <img class="h-5 w-5 self-end" src="../../static/icons/share.svg" alt="Share">
+                        </a>
+                        <a class="hover:opacity-80 cursor-pointer flex items-center" onclick="event.stopPropagation(); alert('Comment!');">
+                            <img class="h-5 w-5 self-end" src="../../static/icons/comment.svg" alt="Comment">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="display">
+    </div>
+
+    {% if user.is_authenticated %}
+        <a class="newPost-btn" id="togglePostForm">
+            <img class="w-8 h-8" src="../../static/icons/quill.svg">
+        </a>
+        <form class="newPost-form" action="{% url 'post' %}" method="post">
+            {% csrf_token %}
+            <h1 class="font-bold text-2xl">New Post</h1>
+            <h2 class="italic">{{ user.username }}</h2>
+            <textarea placeholder="What do you want to share???" name="content" id="content" required></textarea>
+            <button type="submit">Post</button>
+        </form>
+    
+        {% load static %}
+        <script src="{% static 'js/script.js' %}"></script>
+    {% endif %}
+
+
+{% endblock %}

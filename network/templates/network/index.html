@@ -1,0 +1,94 @@
+{% extends "network/layout.html" %}
+{% load custom_filters %}
+
+
+{% block body %}
+
+    <h1 class="text-2xl font-bold mb-4">
+        Social Network
+    </h1>
+
+    <div class="posts">
+        {% for post in posts %}
+            <div class="post" id="{{ post.id }}">
+                <div class="flex justify-between">
+                    <a href="{% url 'profile' post.user.id %}" onclick="event.stopPropagation()" class="post-username italic">@{{post.user}}</a>
+                    <div class="flex items-center gap-2 relative">
+                        <h3 class="post-time text-sm text-gray-400">{{ post.time_ago }}</h3>
+                        {% if user.id == post.user.id %}
+                            <a class="dots-button flex justify-end items-end opacity-60 cursor-pointer"  onclick="event.stopPropagation()">
+                                <img class="h-4" src="../../static/icons/dots.svg" alt="Edit">
+                            </a>
+
+                            <div class="post dots-container">
+                                <a class="flex items-center justify-between gap-2 p-2 hover:bg-gray-800"  onclick="event.stopPropagation()">
+                                   Edit <img class="h-5 w-5" src="../../static/icons/edit.svg" alt="Edit">
+                                </a>
+                                <a class="flex items-center justify-between gap-2 p-2 hover:bg-gray-800" href="{% url 'deletePost' post.id %}" onclick="event.stopPropagation()">
+                                   Delete <img class="flex gap-2 h-5 w-5" src="../../static/icons/delete.svg" alt="Edit">
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <h1 class="post-content py-2">{{post.content}}</h1>
+                <div class="comments">
+                    {% for c in comments_by_post|get_item:post.id %}
+                        <div class="comment">
+                            <div class="flex items-center gap-2">
+                                {% if c.user and c.user.id %}
+                                    <a href="{% url 'profile' c.user.id %}" onclick="event.stopPropagation()" class="comment-username italic">@{{ c.user }}</a>
+                                {% else %}
+                                    <span class="comment-username italic">@Anonymous</span>
+                                {% endif %}
+                                <h3 class="comment-time text-sm text-gray-400">{{ c.time_ago }}</h3>
+                            </div>
+                            <h1 class="comment-content">{{ c.content }}</h1>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="flex gap-4 items-center justify-between">
+                    <a class="hover:opacity-80 cursor-pointer flex items-center" onclick="event.stopPropagation(); alert('Liked!');">
+                        <img class="h-6 w-6 self-start" src="../../static/icons/heart.svg" alt="Like">
+                    </a>
+                    <div class="flex gap-4">
+                        <a class="hover:opacity-80 cursor-pointer flex items-center" onclick="event.stopPropagation(); alert('Share!');">
+                            <img class="h-5 w-5 self-end" src="../../static/icons/share.svg" alt="Share">
+                        </a>
+                        <a class="comment-button hover:opacity-80 cursor-pointer flex items-center" onclick="event.stopPropagation()">
+                            <img class="h-5 w-5 self-end" src="../../static/icons/comment.svg" alt="Comment">
+                        </a>
+                    </div>
+                </div>
+
+                <form class="comment-form" action="{% url 'comment' %}">
+                    <textarea rows="1" id="content" class="comment-area h-full" placeholder="Make your comment..." name="content" required></textarea>
+                    <button class="px-2 py-1" type="submit">Post</button>
+                </form>          
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="display">
+    </div>
+
+    {% if user.is_authenticated %}
+        <a class="newPost-btn" id="togglePostForm">
+            <img class="w-8 h-8" src="../../static/icons/quill.svg">
+        </a>
+        <form class="newPost-form" action="{% url 'post' %}" method="post">
+            {% csrf_token %}
+            <h1 class="font-bold text-2xl">New Post</h1>
+            <h2 class="italic">{{ user.username }}</h2>
+            <textarea placeholder="What do you want to share???" name="content" id="content" required></textarea>
+            <button type="submit">Post</button>
+        </form>
+    
+        {% load static %}
+        <script src="{% static 'js/script.js' %}"></script>
+    {% endif %}
+
+
+{% endblock %}
