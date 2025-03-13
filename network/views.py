@@ -4,17 +4,16 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
-from .models import User, Post, Follow, Comment
+from .models import User, Post, Follow, Comment, Like
 
 
 def index(request):
     if request.method == 'GET':
-        posts = Post.objects.all().order_by('-id')  # Reverse order by default
-        comments_by_post = {post.id: post.commented_post.all() for post in posts}  # Get comments per post
+        posts = Post.objects.all().order_by('-time')  # Reverse order by default
+        # comments_by_post = {post.id: post.commented_post.all() for post in posts} 
 
         return render(request, "network/index.html", {
             'posts': posts,
-            'comments_by_post': comments_by_post  # Pass comments mapped to posts
         })
 
 def post(request):
@@ -117,10 +116,9 @@ def deletePost(request, post_id):
         post.delete()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
 
-def comment(request):
+def comment(request, post_id):
     if request.method == 'POST':
         content = request.POST.get('content', '')
-        post_id = request.POST.get('post_id', '')
         user = request.user
 
         if content and post_id:
@@ -131,3 +129,32 @@ def comment(request):
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
     
     return redirect('index')  # Redirect GET requests to the index page
+
+def like(request, post_id):
+    if request.method == 'POST':
+        user = request.user
+        isLiked = Like.objects.filter(user=user, post=post_id)
+        
+        if isLiked:
+            isLiked.delete()
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
+        else:
+            post = Post.objects.get(pk=post_id)
+            like = Like(user=user, post=post)
+            like.save()
+
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
+    
+    return redirect('index')  # Redirect GET requests to the index page
+
+def updatePost(request, post_id):
+    if request.method == 'POST':
+        content = request.POST.get('content', '')
+        post = Post.objects.get(pk=post_id)
+
+        if request.user == post.user:
+            post.content = content
+            post.save()
+
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
+    

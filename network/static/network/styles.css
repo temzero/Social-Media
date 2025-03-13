@@ -64,7 +64,7 @@ button:hover, .button:hover {
     width: 80px;
     top: 0;
     left: 0; /* Ensure it stays on the left side */
-    z-index: 1000; /* Ensures it stays above other elements */
+    z-index: 88 ; /* Ensures it stays above other elements */
 }
 
 .Content {
@@ -160,7 +160,7 @@ button:hover, .button:hover {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -25%);
+    transform: translate(-50%, -10%);
     background-color: var(--sidebar-bg);
     padding: 24px;
     padding-top: 16px;
@@ -170,15 +170,21 @@ button:hover, .button:hover {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    
     opacity: 0;
-    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-    display: none;
+    transform: translate(-50%, -40%);
+    visibility: hidden;
+    pointer-events: none;
+    
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, visibility 0s 0.3s;
 }
 
 .newPost-form.active {
-    display: flex;
-    transform: translate(-50%, -50%);
     opacity: 1;
+    transform: translate(-50%, -50%);
+    visibility: visible;
+    pointer-events: auto;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
 }
 
 .display {
@@ -189,8 +195,11 @@ button:hover, .button:hover {
 }
 
 .display.active {
-    display: block;
     opacity: 1;
+    transform: translate(-50%, -50%);
+    visibility: visible;
+    pointer-events: auto;
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
 }
 
 .newPost-form button {
@@ -236,7 +245,7 @@ button:hover, .button:hover {
     height: 100vh;
     background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
     backdrop-filter: blur(2px); /* Blurs the background */
-    z-index: 10; /* Ensure it’s above other elements */
+    z-index: 99; /* Ensure it’s above other elements */
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease, visibility 0.2s ease;
@@ -246,14 +255,4 @@ button:hover, .button:hover {
 .overlay.active {
     opacity: 1;
     visibility: visible;
-}
-
-.dots-container {
-    position: absolute;
-    top: -12px;
-    right: -110px;
-    width: 100px;
-    border-radius: 4px;
-    padding: 0;
-    display: none;
 }

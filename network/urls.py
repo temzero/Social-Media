@@ -13,5 +13,7 @@ urlpatterns = [
     path("post", views.post, name="post"),
     path("makeFollow/<int:follower_id>/<str:type>/", views.makeFollow, name="makeFollow"),
     path("follow", views.follow, name="follow"),
-    path("comment", views.comment, name="comment"),
+    path("comment/<int:post_id>", views.comment, name="comment"),
+    path("like/<int:post_id>", views.like, name="like"),
+    path("updatePost/<int:post_id>", views.updatePost, name="updatePost"),
 ]
