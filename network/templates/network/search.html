@@ -1,0 +1,26 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+
+    <h1 class="text-2xl font-bold mb-4">
+       Search
+    </h1>
+
+    <form action="{% url 'searching' %}" method="get" class="posts flex justify-between items-center px-3 py-2">
+        <input name="q" value="{{ request.GET.q }}" type="text" id="search" class="search-input text-lg" placeholder="Search for user..." autofocus>
+        <button class="border-none" type="submit">
+            <img class="w-5 h-5 opacity-60 hover:opacity-100" src="../../static/icons/search.svg" alt="Search">
+        </button>
+    </form>    
+
+    {% if users %}
+        <div class="posts mt-4">
+            {% for user in users %}
+                <a href="{% url 'profile' user.id %}" onclick="event.stopPropagation()" class="search-item font-semibold text-blue-400 italic">@{{user}}</a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <h1 class="text-gray-500 p-4 align-center mt-10">{{message}}</h1>
+    {% endif %}
+    
+{% endblock %}

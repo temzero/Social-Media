@@ -15,6 +15,49 @@ def index(request):
         return render(request, "network/index.html", {
             'posts': posts,
         })
+    
+def follow(request):
+    if request.method == 'GET':
+        followed = Follow.objects.filter(follower=request.user)
+        followed_users = [follow.followed for follow in followed]
+        print("Followed Users:", followed_users) 
+        posts = Post.objects.filter(user__in=followed_users).order_by('-time')
+
+        return render(request, "network/index.html", {
+            'posts': posts,
+            'title': 'Following'
+        })
+    
+def search(request):
+    if request.method == 'GET':
+        query = request.GET.get('q', '')
+        users = User.objects.filter(username__icontains=query)
+        posts = Post.objects.filter(content__icontains=query).order_by('-time')
+
+        if not users and not posts:
+            return render(request, "network/search.html", {
+                'message': f'No results found for "{query}"'
+            })
+
+        return render(request, "network/search.html", {
+            # 'posts': posts,
+            # 'users': users,
+        })
+    
+def searching(request):  
+    if request.method == 'GET':
+        query = request.GET.get('q', '')
+        print("Query:", query)
+        users = User.objects.filter(username__icontains=query)
+
+        if not users:
+            return render(request, "network/search.html", {
+                'message': f'No results found for "{query}"'
+            })
+
+        return render(request, "network/search.html", {
+            'users': users,
+        })
 
 def post(request):
     if request.method == 'POST':
@@ -45,7 +88,7 @@ def login_view(request):
             return HttpResponseRedirect(reverse("index"))
         else:
             return render(request, "network/login.html", {
-                "message": "Invalid username and/or password."
+                "message": "Invalid username or password"
             })
     else:
         return render(request, "network/login.html")
@@ -83,30 +126,33 @@ def register(request):
         return render(request, "network/register.html")
 
 def profile(request, user_id):
-    user = User.objects.get(pk=user_id)
-    posts = Post.objects.filter(user=user).order_by('id').reverse()
-    followed = Follow.objects.filter(follower=user)
-    followers = Follow.objects.filter(followed=user)
+    profileUser = User.objects.get(pk=user_id)
+    
+    # Get users this profile is following
+    following_users = User.objects.filter(followers__follower=profileUser)
+    
+    # Get users who follow this profile
+    follower_users = User.objects.filter(following__followed=profileUser)
+
+    # Get posts by this user
+    posts = Post.objects.filter(user=profileUser).order_by('-time')
 
     return render(request, "network/profile.html", {
-        'profileUser': user,
-        'posts': posts,
-        'followed': followed,
-        'followers': followers
+        "profileUser": profileUser,
+        "following_users": following_users,
+        "follower_users": follower_users,
+        "posts": posts
     })
 
-def follow(request):
-    pass
-
-def makeFollow(request, follower_id, type):
+def makeFollow(request, followed_id, type):
     if type == 'follow':
-        follower = User.objects.get(pk=follower_id)
-        followed = request.user
+        followed = User.objects.get(pk=followed_id)
+        follower = request.user
         if follower != followed:
             follow = Follow(follower=follower, followed=followed)
             follow.save()
     elif type == 'unfollow':
-        follow = Follow.objects.get(follower=follower_id, followed=request.user)
+        follow = Follow.objects.get(follower=request.user, followed=followed_id)
         follow.delete()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
     

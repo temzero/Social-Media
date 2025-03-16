@@ -5,7 +5,18 @@ from datetime import timedelta
 
 
 class User(AbstractUser):
-    pass
+    def __str__(self):
+        return f"{self.username}"
+    
+class Follow(models.Model):
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
+    followed = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers')
+
+    class Meta:
+        unique_together = ('follower', 'followed')  # Prevents duplicate follow
+
+    def __str__(self):
+        return f"{self.follower} followed {self.followed}"
 
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='author')
@@ -67,9 +78,3 @@ class Comment(models.Model):
         else:
             return self.time.strftime('%d %b %Y')
         
-class Follow(models.Model):
-    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='follower')
-    followed = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followed')
-
-    def __str__(self):
-        return f"{self.follower} followed {self.followed}"

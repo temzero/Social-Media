@@ -14,17 +14,12 @@
         <h2 class="text-2xl font-bold mb-8">Login</h2>
 
         <div class="mb-4">
-            <input 
-                autofocus 
-                type="text" 
-                name="username" 
-                placeholder="Username"
-            >
+            <input autofocus type="text" name="username" placeholder="Username" class="search-input">
         </div>
         <div class="mb-4">
-            <input type="password" name="password" placeholder="Password" >
+            <input type="password" name="password" placeholder="Password" class="search-input">
         </div>
-        <button class="p-2 bg-blue-500 w-full rounded" type="submit">Login</button>
+        <button class="p-2 mt-2 bg-blue-500 w-full rounded" type="submit">Login</button>
         <p class="mt-6 text-gray-600 text-center">
             Don't have an account? 
             <a href="{% url 'register' %}" class="text-blue-500 hover:underline">Register here.</a>
