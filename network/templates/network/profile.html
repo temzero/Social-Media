@@ -6,6 +6,7 @@
        Profile
     </h1>
 
+    <!-- profile -->
     <div class="posts mb-4">
         <div class="profile">
             <div class="flex justify-between items-center">
@@ -65,127 +66,7 @@
         </div>
     </div>
 
-    <div class="posts">
-        <div class="profile flex font-semibold ">
-            <h1 class="text-2xl">Posts: {{posts|length}}</h1>
-        </div>
-        {% for post in posts %}
-            <div class="post" id="{{ post.id }}">
-                <div class="flex justify-between">
-                    <div class="flex gap-1 items-center">
-                        <a href="{% url 'profile' post.user.id %}" onclick="event.stopPropagation()" class="post-username font-bold text-blue-400 hover:underline italic">@{{post.user}}</a>
-                        <h3 class="post-time text-sm text-gray-500 italic">{{ post.time_ago }}</h3>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        {% if user.id == post.user.id %}
-                            <a id="dots-button" class="opacity-60 hover:opacity-100 cursor-pointer">
-                                <img class="h-4" src="../../static/icons/dots.svg" alt="Edit">
-                            </a>
+    {% include 'partials/posts.html' %}
+    {% include 'partials/newPostForm.html' %}
 
-                            <div id="delete-edit-buttons" class="flex gap-4" style="display: none;">
-                                <button class="opacity-60 hover:opacity-100 border-none" href="{% url 'deletePost' post.id %}" onclick="event.stopPropagation()">
-                                    <img class="h-5 w-5" src="../../static/icons/delete.svg" alt="Delete">
-                                </button>
-                                <button id="edit-button" class="opacity-60 hover:opacity-100 border-none" onclick="event.stopPropagation();">
-                                    <img class="h-5 w-5" src="../../static/icons/edit.svg" alt="Edit">
-                                </button>
-                            </div>
-
-                            <div id="update-buttons" class="flex gap-4" style="display: none;">
-                                <button id="confirm-edit" class="opacity-60 hover:opacity-100 border-none" onclick="event.stopPropagation();">
-                                    <img class="h-5 w-5" src="../../static/icons/confirm.svg" alt="Confirm">
-                                </button>
-                                <button id="cancel-edit" class="comment-button opacity-60 hover:opacity-100 border-none" onclick="event.stopPropagation();">
-                                    <img class="h-5 w-5" src="../../static/icons/cancel.svg" alt="Cancel">
-                                </button>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-                
-                <h1 id="post-content" class="post-content mt-1">{{post.content}}</h1>
-
-                <form id="edit-form" class="flex pb-2 border-b-2 border-transparent border-b-blue-400" style="display: none;" action="{% url 'updatePost' post.id %}" method="post">
-                    {% csrf_token %}
-                    <textarea rows="1" id="edit-content" name="content" id="content" required>{{ post.content }}</textarea>
-                </form>
-                
-                <div class="comments">
-                    {% for comment in post.commented_post.all %}
-                        <div class="comment">
-                            <div class="flex items-center gap-1">
-                                {% if comment.user and comment.user.id %}
-                                    <a href="{% url 'profile' comment.user.id %}" onclick="event.stopPropagation()" class="comment-username text-blue-400 hover:underline italic">@{{ comment.user }}</a>
-                                {% else %}
-                                    <span class="text-gray-400 comment-username italic">@Anonymous</span>
-                                {% endif %}
-                                <h3 class="comment-time text-sm text-gray-500 italic">{{ comment.time_ago }}</h3>
-                            </div>
-                            <h1 class="comment-content ml-3">{{ comment.content }}</h1>
-                        </div>
-                    {% endfor %}
-                </div>
-
-                <div id="post-buttons-container" class="flex gap-4 items-center justify-between mt-4">
-                    <form class="like-form flex gap-1 items-center" action="{% url 'like' post.id %}" method="post">
-                        {% csrf_token %}
-                        <button class="cursor-pointer flex items-center p-0 border-none" type="submit">
-                            {% if user in post.likers.all %}
-                                <img class="h-6 w-6 self-start" src="../../static/icons/hearted.svg" alt="Unlike">
-                            {% else %}
-                                <img class="opacity-60 hover:opacity-100 h-6 w-6 self-start" src="../../static/icons/heart.svg" alt="Like">
-                            {% endif %}
-                        </button>
-
-                        <!-- Display Liked Users -->
-                        {% if post.likers.all %}
-                            {{post.likers.count}}
-                            <span class="w-[400px] text-gray-400 ml-2 mr-4 overflow-hidden text-ellipsis whitespace-nowrap block">
-                                {% for liker in post.likers.all %}
-                                    <a href="{% url 'profile' liker.id %}" class="text-blue-400 hover:underline italic">@{{ liker }}</a>
-                                {% endfor %}
-                            </span>
-                        {% endif %}
-                    
-                    </form>
-
-                    <div class="flex gap-4">
-                        <button class="opacity-60 hover:opacity-100 cursor-pointer flex items-center border-none" onclick="event.stopPropagation(); alert('Share!');">
-                            <img class="h-5 w-5 self-end" src="../../static/icons/share.svg" alt="Share">
-                        </button>
-                        <button id="comment-button" class="comment-button opacity-60 hover:opacity-100 cursor-pointer flex items-center border-none">
-                            <img class="h-5 w-5 self-end" src="../../static/icons/comment.svg" alt="Comment">
-                        </button>
-                    </div>
-                </div>
-
-                <form id="comment-form" class="comment-form"  style="display: none;" action="{% url 'comment' post.id %}" method="post">
-                    {% csrf_token %} 
-                    <textarea rows="1" id="comment-area" class="comment-area" placeholder="@{{user}}'s making comment..." name="content" required></textarea>
-                    <button class="py-1 px-2 mb-[2px]" type="submit">Post</button>
-                </form>          
-            </div>
-        {% endfor %}
-    </div>
-
-    {% if user.is_authenticated %}
-        <a class="newPost-btn" id="toggleNewPostForm">
-            <img class="w-8 h-8" src="../../static/icons/quill.svg">
-        </a>
-        <form id="newPost-form" class="newPost-form" action="{% url 'post' %}" method="post">
-            {% csrf_token %}
-            <h1 class="font-bold text-2xl">New Post</h1>
-            <a href="{% url 'profile' user.id %}" onclick="event.stopPropagation()" class="post-username font-bold text-blue-400 hover:underline italic">@{{ user.username }}</a>
-            <textarea placeholder="What do you want to share???" name="newPost-input" id="newPost-input" required></textarea>
-            <button type="submit">Post</button>
-        </form>
-    
-        {% load static %}
-        <script src="{% static 'js/script.js' %}"></script>
-    {% endif %}
-
-
-    {% load static %}
-    <script src="{% static 'js/profilescript.js' %}"></script>
-    <script src="{% static 'js/script.js' %}"></script>
 {% endblock %}

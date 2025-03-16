@@ -1,0 +1,58 @@
+{% if user.is_authenticated %}
+
+    <nav id="Sidebar">
+        <a href="{% url 'index' %}">
+            <img class="w-10 h-10" src="../../static/icons/a.svg">
+        </a>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col space-y-8">
+            <a href="{% url 'index' %}" class="flex justify-center items-center w-full hover-effect {% if request.path == '/' %}active{% endif %}">
+                <img class="w-8 h-8" src="../../static/icons/home.svg">
+            </a>
+            
+            <a href="{% url 'follow' %}" class="flex justify-center items-center w-full hover-effect {% if request.path == '/follow' %}active{% endif %}">
+                <img class="w-7 h-7" src="../../static/icons/following.svg">
+            </a>
+
+            <a href="{% url 'search' %}" class="flex justify-center items-center w-full hover-effect {% if request.path == '/search' %}active{% endif %}">
+                <img class="w-7 h-7" src="../../static/icons/search.svg">
+            </a>
+                        
+            <a href="{% url 'newPost' %}" class="flex justify-center items-center w-full hover-effect {% if request.path == '/newPost' %}active{% endif %}">
+                <img class="w-7 h-7" src="../../static/icons/quill.svg">
+            </a>
+            
+        </div>
+        
+        <div class="flex flex-col space-y-2 items-center">
+            <div id="more-nav" style="display: none;">
+                <a href="{% url 'profile' user.id %}" class="font-semibold hover-effect">
+                    <img class="w-8 h-8" src="../../static/icons/profile.svg">
+                </a>
+                <a href="{% url 'darkLight' %}" class="font-semibold hover-effect">
+                    <img class="w-8 h-8" src="../../static/icons/dark-light.svg">
+                </a>
+                <a href="{% url 'logout' %}" class="text-red-600 hover:text-red-800 hover-effect">
+                    <img class="w-8 h-8" src="../../static/icons/logout.svg">
+                </a>
+            </div>
+            
+            <a id="more-nav-button" class="text-red-600 hover:text-red-800 hover-effect cursor-pointer">
+                <img class="w-6 h-6" src="../../static/icons/dots.svg">
+            </a>
+        </div>
+    </nav>            
+
+{% else %}
+
+    <nav id="Navbar">
+        <a  href="{% url 'index' %}" class="flex gap-2 items-center hover-effect">
+            <img class="w-8 h-8" src="../../static/icons/a.svg">
+            <h1 class="text-2xl font-semibold">Social Network</h1>
+        </a>
+        <div class="flex gap-6 px-2">
+            <a href="{% url 'login' %}" class="text-lg hover-effect hover:text-blue-400">Log In</a>
+            <a href="{% url 'register' %}" class="text-lg hover-effect hover:text-blue-400">Register</a>
+        </div>
+    </nav>
+
+{% endif %}

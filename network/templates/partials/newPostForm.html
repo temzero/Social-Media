@@ -1,0 +1,34 @@
+{% if user.is_authenticated %}
+    <a class="newPost-btn opacity-60 hover:opacity-100" id="toggleNewPostForm">
+        <img class="w-8 h-8" src="../../static/icons/quill.svg">
+    </a>
+    <form id="newPost-form" class="newPost-form" action="{% url 'post' %}" method="post">
+        {% csrf_token %}
+        <div class="flex justify-between">
+            <h1 class="font-bold text-2xl">New Post</h1>
+            <a href="{% url 'newPost' %}" id="expandPost" class="hover-effect">
+                <img class="w-4 h-4" src="../../static/icons/expand.svg" alt="">
+            </a>            
+
+        </div>
+        <a href="{% url 'profile' user.id %}" onclick="event.stopPropagation()" class="post-username font-bold text-blue-400 hover:underline italic">@{{ user.username }}</a>
+        <textarea placeholder="What do you want to share???" name="content" id="newPost-input" required></textarea>
+        <button type="submit">Post</button>
+    </form>
+
+    <script>
+        // pass content to new form
+        document.addEventListener("DOMContentLoaded", function () {
+            const expandBtn = document.getElementById("expandPost");
+            const textarea = document.getElementById("newPost-input");
+
+            expandBtn.addEventListener("click", function (event) {
+                event.preventDefault(); // Prevent default link behavior
+
+                const content = encodeURIComponent(textarea.value); // Get and encode content
+                window.location.href = `{% url 'newPost' %}?content=${content}`; // Redirect with content
+            });
+        });
+    </script>
+        
+{% endif %}

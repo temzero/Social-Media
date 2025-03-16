@@ -2,74 +2,27 @@
 
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>{% block title %}Social Network{% endblock %}</title>
-        <link rel="icon" href="{% static 'icons/a.svg' %}" type="image/svg+xml">
+<head>
+    <title>{% block title %}Social Network{% endblock %}</title>
+    <link rel="icon" href="{% static 'icons/a.svg' %}" type="image/svg+xml">
 
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link href="{% static 'network/styles.css' %}" rel="stylesheet">
-    </head>
-    <body class="flex relative">
-            <!-- Sidebar -->
-            {% if user.is_authenticated %}
-                <nav id="Sidebar">
-                    <a href="{% url 'index' %}">
-                        <img class="w-10 h-10" src="../../static/icons/a.svg">
-                    </a>
-                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col space-y-8">
-                            <a href="{% url 'index' %}" class="flex justify-center items-center w-full hover-effect {% if request.path == '/' %}active{% endif %}">
-                                <img class="w-8 h-8" src="../../static/icons/home.svg">
-                            </a>
-                            
-                            <a href="{% url 'follow' %}" class="flex justify-center items-center w-full hover-effect {% if request.path == '/follow' %}active{% endif %}">
-                                <img class="w-7 h-7" src="../../static/icons/following.svg">
-                            </a>
-                            
-                            <a href="{% url 'search' %}" class="flex justify-center items-center w-full hover-effect {% if request.path == '/search' %}active{% endif %}">
-                                <img class="w-7 h-7" src="../../static/icons/search.svg">
-                            </a>
-                            
-                        </div>
-                        
-                        <div class="flex flex-col space-y-2 items-center">
-                            <div id="more-nav" style="display: none;">
-                                <a href="{% url 'profile' user.id %}" class="font-semibold hover-effect">
-                                    <img class="w-8 h-8" src="../../static/icons/profile.svg">
-                                </a>
-                                <a href="{% url 'logout' %}" class="text-red-600 hover:text-red-800 hover-effect">
-                                    <img class="w-8 h-8" src="../../static/icons/logout.svg">
-                                </a>
-                            </div>
-                            
-                            <a id="more-nav-button" class="text-red-600 hover:text-red-800 hover-effect cursor-pointer" onclick="toggleMoreNav()">
-                                <img class="w-6 h-6" src="../../static/icons/dots.svg">
-                            </a>
-                        </div>
-                    </nav>            
-                {% else %}
-                    <nav id="Navbar">
-                        <a  href="{% url 'index' %}" class="flex gap-2 items-center hover-effect">
-                            <img class="w-8 h-8" src="../../static/icons/a.svg">
-                            <h1 class="text-2xl font-semibold">Social Network</h1>
-                        </a>
-                        <div class="flex gap-6 px-2">
-                            <a href="{% url 'login' %}" class="text-lg hover-effect hover:text-blue-400">Log In</a>
-                            <a href="{% url 'register' %}" class="text-lg hover-effect hover:text-blue-400">Register</a>
-                        </div>
-                    </nav>
-                {% endif %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="{% static 'network/styles.css' %}" rel="stylesheet">
+</head>
 
-            <!-- Main Content -->
-            <div class="Content">
-                {% block body %}
-                {% endblock %}
-            </div>
-            
-            <div id="overlay-content" class="overlay-content"></div>
-            <div id="overlay" class="overlay"></div>
-    </body>
+<body class="flex relative">
+    <!-- Navigation bar -->
+    {% include 'partials/navbar.html' %}
+    <!-- Main Content -->
+    <div class="Content">
+        {% block body %}
+        {% endblock %}
+    </div>
+    
+    <div id="overlay-content" class="overlay-content"></div>
+    <div id="overlay" class="overlay"></div>
 
-    {% load static %}
     <script src="{% static 'js/script.js' %}"></script>
-
+    
+</body>
 </html>

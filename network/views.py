@@ -58,6 +58,10 @@ def searching(request):
         return render(request, "network/search.html", {
             'users': users,
         })
+    
+def newPost(request):  
+    if request.method == 'GET':
+        return render(request, "network/newPost.html",)
 
 def post(request):
     if request.method == 'POST':
@@ -68,11 +72,7 @@ def post(request):
             post = Post(content=content, user=user)
             post.save()
         
-         # Redirect to the previous page (refresh effect)
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
-
-    # Handle GET requests properly
-    return redirect('index')  # Redirect GET requests to the index page
+        return redirect('index')  # Redirect GET requests to the index page
 
 def login_view(request):
     if request.method == "POST":
@@ -204,3 +204,5 @@ def updatePost(request, post_id):
 
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
     
+def darkLight(request): 
+    pass
