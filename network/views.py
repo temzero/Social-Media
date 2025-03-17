@@ -1,20 +1,22 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.core.paginator import Paginator
 
 from .models import User, Post, Follow, Comment, Like
 
-
 def index(request):
-    if request.method == 'GET':
-        posts = Post.objects.all().order_by('-time')  # Reverse order by default
-        # comments_by_post = {post.id: post.commented_post.all() for post in posts} 
+    posts = Post.objects.all().order_by('-time')
+    paginator = Paginator(posts, 10)  # Show 10 posts per page
 
-        return render(request, "network/index.html", {
-            'posts': posts,
-        })
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "network/index.html", {
+        'posts': page_obj,  # Send paginated posts
+    })
     
 def follow(request):
     if request.method == 'GET':

@@ -34,7 +34,6 @@ textarea {
     background-color: transparent;
     border: none;
     outline: none;
-    resize: none; /* Disable manual resizing */
     width: 100%;
     height: auto;
     max-height: 74vh;
@@ -42,10 +41,6 @@ textarea {
 
 textarea::-webkit-resizer {
     display: none; /* Hide resizer in WebKit browsers */
-}
-
-textarea::-webkit-scrollbar {
-    display: none; /* Hide scrollbar in WebKit browsers */
 }
 
 button, .button {
@@ -111,8 +106,19 @@ button:hover, .button:hover {
     overflow-y: auto;
 }
 
+/* Scrollbar custom */
 .Content::-webkit-scrollbar {
-    display: none; /* Chrome, Safari */
+    width: 8px; /* Adjust width */
+}
+
+.Content::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+
+.Content::-webkit-scrollbar-thumb:hover {
+    cursor: pointer;
+    background: white;
 }
 
 .posts {
