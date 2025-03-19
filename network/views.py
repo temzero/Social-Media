@@ -4,19 +4,25 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.core.paginator import Paginator
+from django.template.loader import render_to_string
 
 from .models import User, Post, Follow, Comment, Like
 
 def index(request):
+    return render(request, "network/index.html")
+
+def get_posts(request):
     posts = Post.objects.all().order_by('-time')
-    paginator = Paginator(posts, 10)  # Show 10 posts per page
-
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    return render(request, "network/index.html", {
-        'posts': page_obj,  # Send paginated posts
-    })
+    paginator = Paginator(posts, 5)  # Show 10 posts per page
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.page(page_number)
+    
+    print("Received page number:", page_number)
+    
+    if request.headers.get('HX-Request'):
+        return render(request, "partials/posts.html", {'page_obj': page_obj})
+    
+    return render(request, "network/index.html", {'page_obj': page_obj})
     
 def follow(request):
     if request.method == 'GET':
@@ -24,9 +30,13 @@ def follow(request):
         followed_users = [follow.followed for follow in followed]
         print("Followed Users:", followed_users) 
         posts = Post.objects.filter(user__in=followed_users).order_by('-time')
+        paginator = Paginator(posts, 10)  
+
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
         return render(request, "network/index.html", {
-            'posts': posts,
+            'page_obj': page_obj,
             'title': 'Following'
         })
     
@@ -41,10 +51,7 @@ def search(request):
                 'message': f'No results found for "{query}"'
             })
 
-        return render(request, "network/search.html", {
-            # 'posts': posts,
-            # 'users': users,
-        })
+        return render(request, "network/search.html")
     
 def searching(request):  
     if request.method == 'GET':
@@ -138,12 +145,16 @@ def profile(request, user_id):
 
     # Get posts by this user
     posts = Post.objects.filter(user=profileUser).order_by('-time')
+    paginator = Paginator(posts, 10)  
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     return render(request, "network/profile.html", {
         "profileUser": profileUser,
         "following_users": following_users,
         "follower_users": follower_users,
-        "posts": posts
+        "page_obj": page_obj
     })
 
 def makeFollow(request, followed_id, type):

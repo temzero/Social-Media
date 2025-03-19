@@ -1,7 +1,7 @@
-{% if posts %}
-    <div class="posts">
-        {% for post in posts %}
-            <div class="post" id="{{ post.id }}">
+{% if page_obj %}
+    <div class="posts" id="posts">
+        {% for post in page_obj %}
+            <div class="post" id="{{ post.id }}" onclick="console.log('clicked post-{{post.id}}')">
                 <div class="flex justify-between">
                     <div class="flex gap-2 items-center">
                         <a href="{% url 'profile' post.user.id %}" onclick="event.stopPropagation()" class="post-username font-bold text-blue-400 hover:underline italic">@{{post.user}}</a>
@@ -92,7 +92,7 @@
                             <img class="h-5 w-5" src="../../static/icons/share.svg" alt="Share">
                         </button>
                         {% if user.is_authenticated %}
-                            <button id="comment-button" class="comment-button opacity-60 hover:opacity-100 cursor-pointer flex items-center border-none" onclick="event.stopPropagation();">
+                            <button id="comment-button" class="comment-button opacity-60 hover:opacity-100 cursor-pointer flex items-center border-none">
                                 <img class="h-5 w-5" src="../../static/icons/comment.svg" alt="Comment">
                                 {% if post.commented_post.count %}
                                     <span class="text-sm ml-1">
@@ -115,26 +115,19 @@
                 </form>          
             </div>
         {% endfor %}
-    </div>
 
-    <!-- <button id="more-post" class="gap-2 items-center px-4 py-1 mt-4 hover-effect" onclick="loadMorePosts()">
-        <h1>More posts</h1>
-        <img class="h-4 w-4" src="../../static/icons/arrow-down.svg" alt="More">
-    </button> -->
-
-    <!-- Pagination Controls -->
-    <div class="pagination flex justify-center gap-2 mt-4">
-        <!-- Page Numbers -->
-        {% for num in posts.paginator.page_range %}
-            {% if num == posts.number %}
-                <span class="px-3 py-1 text-blue-400 font-bold rounded cursor-pointer">{{ num }}</span>
-            {% else %}
-                <a href="?page={{ num }}" class="px-3 py-1 rounded cursor-pointer hover-effect">{{ num }}</a>
-            {% endif %}
-        {% endfor %}
     </div>
     
-
-{% else %}
-    <h1 class="mt-4 opacity-40" >No posts found!</h1>
 {% endif %}
+
+
+{% if page_obj.has_next %}
+    <div id="load-more-trigger"
+        hx-get="{% url 'get_posts' %}?page={{ page_obj.next_page_number }}"
+        hx-trigger="intersect once"
+        hx-target="#posts"
+        hx-swap="beforeend"
+        hx-on="htmx:afterRequest: if (!this.parentElement.innerHTML.includes('More posts')) { this.remove(); }">
+    </div>
+{% endif %}
+

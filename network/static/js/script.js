@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const toggleNewPostForm = document.querySelector("#toggleNewPostForm");
     const overlay = document.querySelector(".overlay");
     const overlay_content = document.querySelector(".overlay-content");
-    const allPosts = document.querySelectorAll(".post");
     const following_button = document.querySelector("#following-button");
     const followers_button = document.querySelector("#followers-button");
     const following_users = document.querySelector("#following-users");
@@ -46,23 +45,27 @@ document.addEventListener("DOMContentLoaded", function () {
             if (comment_form) comment_form.style.display = "none";
         });
     }
+
+    document.addEventListener("click", function (event) {
+        const post = event.target.closest(".post");
+        if (!post) return; // Ensure a post is clicked
     
-
-    allPosts.forEach(post => {
-        const comment_button = post.querySelector(".comment-button");
-        comment_button.addEventListener("click", () => {
+        // Check if the comment button is clicked
+        if (event.target.closest("#comment-button")) {
+            console.log("Comment button clicked!");
             overlay_content.innerHTML = post.innerHTML;
             toggleActive(overlay, overlay_content);
-            setupPostEvents(overlay_content, 'comment');
-        });
-
-        post.addEventListener("click", () => {
-            overlay_content.innerHTML = post.innerHTML;
-            toggleActive(overlay, overlay_content);
-            setupPostEvents(overlay_content);
-        });
+            setupPostEvents(overlay_content, "comment");
+            event.stopPropagation(); // Prevent triggering the post click event
+            return; // Stop further execution
+        }
+    
+        // If clicking anywhere else inside the post
+        console.log("Post clicked!");
+        overlay_content.innerHTML = post.innerHTML;
+        toggleActive(overlay, overlay_content);
+        setupPostEvents(overlay_content);
     });
-
 
     // Functions
     function toggleVisibility(...elements) {

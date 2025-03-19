@@ -7,14 +7,16 @@
     <link rel="icon" href="{% static 'icons/a.svg' %}" type="image/svg+xml">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <link href="{% static 'network/styles.css' %}" rel="stylesheet">
+    <meta name="csrf-token" content="{% csrf_token %}">
 </head>
 
 <body class="flex">
     <!-- Navigation bar -->
     {% include 'partials/navbar.html' %}
     <!-- Main Content -->
-    <div class="Content">
+    <div class="Content" id="content">
         {% block body %}
         {% endblock %}
     </div>

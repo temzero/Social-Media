@@ -6,7 +6,7 @@
        Search
     </h1>
 
-    <form action="{% url 'searching' %}" method="get" class="posts flex justify-between items-center px-3 py-2">
+    <form action="{% url 'searching' %}" method="get" class="posts item flex justify-between items-center px-3 py-2">
         <input name="q" value="{{ request.GET.q }}" type="text" id="search" class="search-input text-lg" placeholder="Search for user..." autofocus>
         <button class="border-none" type="submit">
             <img class="w-5 h-5 opacity-60 hover:opacity-100" src="../../static/icons/search.svg" alt="Search">

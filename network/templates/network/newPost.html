@@ -6,7 +6,7 @@
        Make New Post
     </h1>
 
-    <form id="newPost-form" class="posts p-4" action="{% url 'post' %}" method="post">
+    <form id="newPost-form" class="posts item p-6" action="{% url 'post' %}" method="post">
         {% csrf_token %}
         <a href="{% url 'profile' user.id %}" onclick="event.stopPropagation()" class="post-username text-xl font-bold text-blue-400 hover:underline italic">@{{ user.username }}</a>
         <textarea placeholder="What do you want to share???" 
