@@ -1,0 +1,45 @@
+<div class="comment" id="{{comment.id}}">
+    <div class="flex justify-between">
+        <div class="flex items-center gap-1">
+            {% if comment.user %}
+                <a href="{% url 'profile' comment.user.id %}" onclick="event.stopPropagation()" class="comment-username text-blue-400 hover:underline italic">@{{ comment.user }}</a>
+            {% else %}
+                <span class="text-gray-400 comment-username italic">@Anonymous</span>
+            {% endif %}
+            <h3 class="comment-time text-sm text-gray-500 italic">{{ comment.time_ago }}</h3> 
+        </div>
+        
+        <div class="flex items-center gap-2">
+            {% if user.id == comment.user.id %}
+                <a id="{{comment.id}}" class="comment-dots-button opacity-60 hover:opacity-100 cursor-pointer">
+                    <img class="h-4" src="../../static/icons/dots.svg" alt="Edit">
+                </a>
+
+                <div id="{{comment.id}}" class="comment-edit-delete-button-container flex gap-4" style="display: none;">
+                    <a class="opacity-60 hover:opacity-100 border-none" href="{% url 'deleteComment' comment.id %}">
+                        <img class="h-5 w-5" src="../../static/icons/delete.svg" alt="Delete">
+                    </a>
+                    <a id="comment-edit-button" class="opacity-60 hover:opacity-100 border-none cursor-pointer" onclick="event.stopPropagation();">
+                        <img class="h-5 w-5" src="../../static/icons/edit.svg" alt="Edit">
+                    </a>
+                </div>
+
+                <div id="comment-confirm-cancel-button-container" class="flex gap-4" style="display: none;">
+                    <button id="comment-confirm-edit" class="border-none" onclick="event.stopPropagation();" disabled>
+                        <img class="h-5 w-5" src="../../static/icons/confirm.svg" alt="Confirm">
+                    </button>
+                    <button id="comment-cancel-edit" class="border-none" onclick="event.stopPropagation();">
+                        <img class="h-5 w-5" src="../../static/icons/cancel.svg" alt="Cancel">
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <h1 id="comment-content" class="comment-content ml-3">{{ comment.content }}</h1>
+
+    <form id="{{comment.id}}" action="{% url 'updateComment' comment.id %}" method="post" class="comment-edit-form flex pb-2 border-b-2 border-transparent border-b-blue-400" style="display: none;">
+        {% csrf_token %}
+        <textarea rows="1" name="edit-comment-content" id="comment-edit-content" required>{{ comment.content }}</textarea>
+    </form>
+</div>

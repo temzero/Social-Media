@@ -1,0 +1,233 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+
+<div class="posts" id="posts">
+        <div class="post-detail" id="{{ post.id }}">
+            <div class="flex justify-between">
+                <div class="flex gap-2 items-center">
+                    <a href="{% url 'profile' post.user.id %}" onclick="event.stopPropagation()" class="post-username font-bold text-blue-400 hover:underline italic">@{{post.user}}</a>
+                    <h3 class="post-time text-sm text-gray-500 italic">{{ post.time_ago }}</h3>
+                </div>
+                <!-- edit post -->
+                <div class="flex items-center gap-2">
+                    {% if user.id == post.user.id %}
+                        <a id="dots-button" class="opacity-60 hover:opacity-100 cursor-pointer">
+                            <img class="h-4" src="../../static/icons/dots.svg" alt="Edit">
+                        </a>
+
+                        <div id="edit-delete-button-container" class="flex gap-4" style="display: none;">
+                            <a class="opacity-60 hover:opacity-100 border-none" href="{% url 'deletePost' post.id %}">
+                                <img class="h-5 w-5" src="../../static/icons/delete.svg" alt="Delete">
+                            </a>
+                            <a id="edit-button" class="opacity-60 hover:opacity-100 border-none cursor-pointer" onclick="event.stopPropagation();">
+                                <img class="h-5 w-5" src="../../static/icons/edit.svg" alt="Edit">
+                            </a>
+                        </div>
+
+                        <div id="confirm_cancel_button_container" class="flex gap-4" style="display: none;">
+                            <button id="confirm-edit" class="border-none" onclick="event.stopPropagation();" disabled>
+                                <img class="h-5 w-5" src="../../static/icons/confirm.svg" alt="Confirm">
+                            </button>
+                            <button id="cancel-edit" class="border-none" onclick="event.stopPropagation();">
+                                <img class="h-5 w-5" src="../../static/icons/cancel.svg" alt="Cancel">
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <h1 id="post-content" class="post-content mt-1">{{post.content}}</h1>
+
+            <form id="edit-form" class="flex pb-2 mt-2 border-b-2 border-transparent border-b-blue-400" style="display: none;" action="{% url 'updatePost' post.id %}" method="post">
+                {% csrf_token %}
+                <textarea rows="1" id="edit-content" name="content" required>{{ post.content }}</textarea>
+            </form>
+            
+            <div class="comments">
+                {% for comment in post.commented_post.all %}
+                    {% include 'partials/postComments.html' %}
+                {% endfor %}
+            </div>
+
+            <div id="post-buttons-container" class="flex gap-4 items-center justify-between mt-8">
+
+                <form class="like-form flex items-center" action="{% url 'like' post.id %}" >
+                    {% csrf_token %}
+                    {% if user.is_authenticated %}
+                        <button class="cursor-pointer flex items-center p-0 border-none" type="submit" onclick="event.stopPropagation();">
+                            {% if user in post.likers.all %}
+                                <img class="h-6 w-6" src="../../static/icons/hearted.svg" alt="Unlike">
+                            {% else %}
+                                <img class="h-6 w-6 opacity-60 hover:opacity-100" src="../../static/icons/heart.svg" alt="Like">
+                            {% endif %}
+                        </button>
+                    {% else %}
+                        <button class="cursor-not-allowed opacity-50 flex items-center p-0 border-none" type="button" onclick="alert('You must be logged in to like posts!')">
+                            <img class="opacity-50 h-6 w-6 self-start" src="../../static/icons/heart.svg" alt="Like">
+                        </button>
+                    {% endif %}
+
+                    <!-- Display Liked Users -->
+                    {% if post.likers.all %}
+                        <span class="text-sm opacity-40 ml-1">
+                            {{post.likers.count}}
+                        </span>
+                        <span class="w-[400px] text-gray-400 ml-3 mr-4 overflow-hidden text-ellipsis whitespace-nowrap block">
+                            {% for liker in post.likers.all %}
+                                <a href="{% url 'profile' liker.id %}" class="text-blue-400 hover:underline italic" onclick="event.stopPropagation()">@{{ liker }}</a>
+                            {% endfor %}
+                        </span>
+                    {% endif %}
+                </form>
+
+                <div class="flex">
+                    <button class="mr-3 opacity-60 hover:opacity-100 cursor-pointer flex items-center border-none" onclick="event.stopPropagation(); alert('Share!');">
+                        <img class="h-5 w-5" src="../../static/icons/share.svg" alt="Share">
+                    </button>
+                    {% if user.is_authenticated %}
+                        <button id="comment-button" class="comment-button opacity-60 hover:opacity-100 cursor-pointer flex items-center border-none">
+                            <img class="h-5 w-5" src="../../static/icons/comment.svg" alt="Comment">
+                            {% if post.commented_post.count %}
+                                <span class="text-sm ml-1">
+                                    {{post.commented_post.count}}
+                                </span>
+                            {% endif %}
+                        </button>
+                    {% else %}
+                        <button class="cursor-not-allowed opacity-40 flex items-center p-0 border-none " type="button" onclick="alert('You must be logged in to comment!')">
+                            <img class="h-5 w-5" src="../../static/icons/comment.svg" alt="Comment">
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <form id="{{ post.id }}" class="comment-form" action="{% url 'comment' post.id %}">
+                {% csrf_token %} 
+                <textarea rows="1" id="comment-area" placeholder="@{{user}}'s making comment..." name="content" required autofocus></textarea>
+                <button id="post-btn" class=" py-1 px-2" type="submit" disabled>Post</button>
+            </form>            
+        </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const postId = "{{ post.id }}";  // Get post ID from Django template
+        const thisPost = document.querySelector(`.post-detail[id="${postId}"]`);
+
+        const postButton = thisPost.querySelector("#post-btn");
+        const commentArea = thisPost.querySelector("#comment-area");
+        const confirmEditButton = thisPost.querySelector("#confirm-edit");
+        const editInput = thisPost.querySelector("#edit-content");
+
+        inputEvent(commentArea, postButton);
+        inputEvent(editInput, confirmEditButton);
+
+            // enable post btn when has input
+        function inputEvent(input, button) {
+            if (!input) return
+            input.addEventListener("input", function () {
+                if (button) {
+                    button.disabled = input.value.trim() === "";
+                }
+                input.style.height = "auto";
+                input.style.height = input.scrollHeight + "px";
+            });        
+        }
+
+
+        document.addEventListener("submit", function (event) {
+            // handle like
+            const likeForm = event.target.closest(".like-form");
+            if (likeForm) {
+                event.preventDefault(); // Prevent default form submission
+
+                const formData = new FormData(likeForm);
+                const url = likeForm.getAttribute("action");
+
+                fetch(url, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const likeButton = likeForm.querySelector("button");
+                        const likeImage = likeButton.querySelector("img");
+                        const likeCount = likeForm.querySelector("span.text-sm");
+
+                        // Toggle like/unlike images
+                        if (data.liked) {
+                            likeImage.src = "../../static/icons/hearted.svg";
+                            likeImage.classList.remove("opacity-60");
+                        } else {
+                            likeImage.src = "../../static/icons/heart.svg";
+                            likeImage.classList.add("opacity-60");
+                        }
+
+                        // Update like count
+                        likeCount.textContent = data.like_count;
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+            }
+
+            // handle comment
+            const commentForm = event.target.closest(".post-comment-form");
+            if (commentForm) {
+                event.preventDefault(); // Prevent default form submission
+
+                const postId = commentForm.id;
+
+                const commentArea = commentForm.querySelector("#post-comment-area");
+                const post_btn = commentForm.querySelector("#post-btn");
+                const url = commentForm.getAttribute("action");
+
+                const formData = new FormData(commentForm);
+                const content = commentArea.value.trim();
+
+                if (!content) {
+                    event.preventDefault(); // Prevent form submission
+                    alert("Comment cannot be empty or only spaces!"); // Show warning
+                }          
+
+                fetch(url, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {           
+                        
+                        // Create new comment element
+                        const newComment = document.createElement("div");
+                        newComment.classList.add("comment");
+
+                        newComment.innerHTML = `
+                            <div class="flex items-center gap-1">
+                                <a href="/profile/${data.user_id}" class="comment-username text-blue-400 hover:underline italic">@${data.username}</a>
+                                <h3 class="comment-time text-sm text-gray-500 italic">${data.time_ago}</h3>
+                            </div>
+                            <h1 class="comment-content ml-3">${data.content}</h1>
+                        `;
+
+                        // Append new comment
+                        comments.appendChild(newComment);
+                        // Clear textarea
+                        commentForm.querySelector("textarea").value = "";
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+            }
+        });  
+    });
+</script>
+
+{% endblock %}

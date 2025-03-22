@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.timezone import now
 from datetime import timedelta
+from django.core.exceptions import ValidationError
 
 
 class User(AbstractUser):
@@ -44,7 +45,7 @@ class Post(models.Model):
         elif diff < timedelta(days=7):
             return f"{diff.days}d"
         else:
-            return self.time.strftime('%d %b %Y')
+            return f"{diff.days}d"
 
 class Like(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='liker')
@@ -77,4 +78,13 @@ class Comment(models.Model):
             return f"{diff.days}d"
         else:
             return self.time.strftime('%d %b %Y')
+        
+    def clean(self):
+        # Prevent empty or whitespace-only content
+        if not self.content.strip():
+            raise ValidationError("Comment content cannot be empty or contain only spaces.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()  # Run model validation before saving
+        super().save(*args, **kwargs)
         

@@ -44,7 +44,7 @@ textarea::-webkit-resizer {
 }
 
 button, .button {
-    border: 1px solid var(--border-color);
+    border: 1px solid white;
     border-radius: 4px;
     padding: 4px 8px;
     display: flex;
@@ -53,7 +53,11 @@ button, .button {
 }
 
 button:hover, .button:hover {
-    border-color: white;
+    opacity: 0.8;
+}
+
+button:disabled, .button:disabled {
+    opacity: 0.2;
 }
 
 #Sidebar {
@@ -138,6 +142,16 @@ button:hover, .button:hover {
     padding-bottom: 16px;
     border-bottom: 4px solid var(--border-color);
     cursor: pointer;
+}
+
+.post-detail {
+    padding: 20px 30px;
+}
+
+.post-detail .comment-form {
+    margin: -20px -30px;
+    margin-top: 20px;
+    border-top: 2px solid var(--border-color);
 }
 
 .post:first-child {
@@ -281,6 +295,8 @@ button:hover, .button:hover {
 }
 
 .comments {
+    display: flex;
+    flex-direction: column;
     margin-top: 8px;
     margin-bottom: 12px;
 }
@@ -294,29 +310,26 @@ button:hover, .button:hover {
 }
 
 .comment-form {
-    position: relative;
-    align-items: end;
+    display: flex;
     gap: 8px;
-    padding: 20px;
+    align-items: end;
+    padding: 10px;
     margin-left: -24px;
     margin-right: -24px;
     margin-bottom: -16px;
     border-top: 2px solid var(--border-color);
 }
 
-.comment-form button {
-    position: absolute;
-    bottom: 12px;
-    right: 20px;
+.comment-form textarea {
+    padding-left: 6px;
+    padding-bottom: 6px;
 }
-
 
 .follow-container {
     width: 300px;
     padding: 12px;
     border: 2px solid var(--border-color);
     border-radius: 4px;
-    background-color: var(--sidebar-bg);
     z-index: 999;
     display: none;
 }
@@ -326,7 +339,8 @@ button:hover, .button:hover {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: var(--sidebar-bg);
+    background-color: var(--bg-item);
+
     display: block;
 }
 

@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.core.paginator import Paginator
 from django.template.loader import render_to_string
+from django.utils.timezone import now
 
 from .models import User, Post, Follow, Comment, Like
 
@@ -13,7 +14,7 @@ def index(request):
 
 def get_posts(request):
     posts = Post.objects.all().order_by('-time')
-    paginator = Paginator(posts, 5)  # Show 10 posts per page
+    paginator = Paginator(posts, 10)  # Show 10 posts per page
     page_number = request.GET.get('page', 1)
     page_obj = paginator.page(page_number)
     
@@ -72,7 +73,7 @@ def newPost(request):
     if request.method == 'GET':
         return render(request, "network/newPost.html",)
 
-def post(request):
+def createPost(request):
     if request.method == 'POST':
         content = request.POST.get('content', '')  # Use .get() to avoid errors if 'content' is missing
         user = request.user  # No need to query User again, request.user is already the object
@@ -82,6 +83,12 @@ def post(request):
             post.save()
         
         return redirect('index')  # Redirect GET requests to the index page
+    
+def post(request, post_id):
+    if request.method == 'GET':
+        post = Post.objects.get(pk=post_id)
+        return render(request, "network/post.html", {'post': post})
+    
 
 def login_view(request):
     if request.method == "POST":
@@ -168,16 +175,10 @@ def makeFollow(request, followed_id, type):
         follow = Follow.objects.get(follower=request.user, followed=followed_id)
         follow.delete()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
-    
-def deletePost(request, post_id):
-    post = Post.objects.get(pk=post_id)
-    if request.user == post.user:
-        post.delete()
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
 
 def comment(request, post_id):
     if request.method == 'POST':
-        content = request.POST.get('content', '')
+        content = request.POST.get('content', '').strip()  # Trim whitespace
         user = request.user
 
         if content and post_id:
@@ -185,37 +186,67 @@ def comment(request, post_id):
             comment = Comment(content=content, user=user, post=post)
             comment.save()
 
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
+            return JsonResponse({"success": True, "content": comment.content, 'time_ago': comment.time_ago(), 'username': user.username, 'user_id': user.id})
+
+        return JsonResponse({"success": False, "error": "Comment cannot be empty"}, status=400)
     
-    return redirect('index')  # Redirect GET requests to the index page
+    return redirect('index')  # Redirect GET requests
+
+def updateComment(request, comment_id):
+    if request.method == 'POST':
+        comment = Comment.objects.get(pk=comment_id)
+        post = comment.post
+        new_comment = request.POST.get('edit-comment-content', '').strip()
+
+        if request.user == comment.user:
+            comment.content = new_comment
+            comment.time = now()  # Set to current timestamp
+            comment.save()
+
+        return render(request, "network/post.html", {'post': post})
+        # return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
+
+def deleteComment(request, comment_id):
+    comment = Comment.objects.get(pk=comment_id)
+    if request.user == comment.user:
+        comment.delete()
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
 
 def like(request, post_id):
     if request.method == 'POST':
         user = request.user
-        isLiked = Like.objects.filter(user=user, post=post_id)
-        
+        post = Post.objects.get(pk=post_id)
+        isLiked = Like.objects.filter(user=user, post=post)
+
         if isLiked:
             isLiked.delete()
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
+            liked = False
         else:
-            post = Post.objects.get(pk=post_id)
-            like = Like(user=user, post=post)
-            like.save()
+            Like.objects.create(user=user, post=post)
+            liked = True
 
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
+        return JsonResponse({"success": True, "liked": liked, "like_count": post.likers.count()})
     
-    return redirect('index')  # Redirect GET requests to the index page
+    return redirect('index')
+
 
 def updatePost(request, post_id):
     if request.method == 'POST':
-        content = request.POST.get('content', '')
+        content = request.POST.get('content', '').strip()
         post = Post.objects.get(pk=post_id)
 
         if request.user == post.user:
             post.content = content
             post.save()
 
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
-    
+        return render(request, "network/post.html", {'post': post})
+        # return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
+
+def deletePost(request, post_id):
+    post = Post.objects.get(pk=post_id)
+    if request.user == post.user:
+        post.delete()
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', request.path))
+
 def darkLight(request): 
     pass

@@ -9,7 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <link href="{% static 'network/styles.css' %}" rel="stylesheet">
-    <meta name="csrf-token" content="{% csrf_token %}">
+    <!-- <meta name="csrf-token" content="{% csrf_token %}"> -->
 </head>
 
 <body class="flex">
@@ -21,7 +21,7 @@
         {% endblock %}
     </div>
     
-    <div id="overlay-content" class="overlay-content"></div>
+    <div class="overlay-content"></div>
     <div id="overlay" class="overlay"></div>
 
     <script src="{% static 'js/script.js' %}"></script>

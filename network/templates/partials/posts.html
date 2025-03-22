@@ -7,26 +7,27 @@
                         <a href="{% url 'profile' post.user.id %}" onclick="event.stopPropagation()" class="post-username font-bold text-blue-400 hover:underline italic">@{{post.user}}</a>
                         <h3 class="post-time text-sm text-gray-500 italic">{{ post.time_ago }}</h3>
                     </div>
+                    <!-- edit post -->
                     <div class="flex items-center gap-2">
                         {% if user.id == post.user.id %}
                             <a id="dots-button" class="opacity-60 hover:opacity-100 cursor-pointer">
                                 <img class="h-4" src="../../static/icons/dots.svg" alt="Edit">
                             </a>
 
-                            <div id="delete-edit-buttons" class="flex gap-4" style="display: none;">
-                                <button class="opacity-60 hover:opacity-100 border-none" href="{% url 'deletePost' post.id %}" onclick="event.stopPropagation()">
+                            <div id="edit-delete-button-container" class="flex gap-4" style="display: none;">
+                                <a class="opacity-60 hover:opacity-100 border-none" href="{% url 'deletePost' post.id %}">
                                     <img class="h-5 w-5" src="../../static/icons/delete.svg" alt="Delete">
-                                </button>
-                                <button id="edit-button" class="opacity-60 hover:opacity-100 border-none" onclick="event.stopPropagation();">
+                                </a>
+                                <a id="edit-button" class="opacity-60 hover:opacity-100 border-none cursor-pointer" onclick="event.stopPropagation();">
                                     <img class="h-5 w-5" src="../../static/icons/edit.svg" alt="Edit">
-                                </button>
+                                </a>
                             </div>
 
-                            <div id="update-buttons" class="flex gap-4" style="display: none;">
-                                <button id="confirm-edit" class="opacity-60 hover:opacity-100 border-none" onclick="event.stopPropagation();">
+                            <div id="confirm_cancel_button_container" class="flex gap-4" style="display: none;">
+                                <button id="confirm-edit" class="border-none" onclick="event.stopPropagation();" disabled>
                                     <img class="h-5 w-5" src="../../static/icons/confirm.svg" alt="Confirm">
                                 </button>
-                                <button id="cancel-edit" class="opacity-60 hover:opacity-100 border-none" onclick="event.stopPropagation();">
+                                <button id="cancel-edit" class="border-none" onclick="event.stopPropagation();">
                                     <img class="h-5 w-5" src="../../static/icons/cancel.svg" alt="Cancel">
                                 </button>
                             </div>
@@ -38,59 +39,50 @@
 
                 <form id="edit-form" class="flex pb-2 border-b-2 border-transparent border-b-blue-400" style="display: none;" action="{% url 'updatePost' post.id %}" method="post">
                     {% csrf_token %}
-                    <textarea rows="1" id="edit-content" name="content" id="content" required>{{ post.content }}</textarea>
+                    <textarea rows="1" id="edit-content" name="content" required>{{ post.content }}</textarea>
                 </form>
                 
                 <div class="comments">
                     {% for comment in post.commented_post.all %}
-                        <div class="comment">
-                            <div class="flex items-center gap-1">
-                                {% if comment.user and comment.user.id %}
-                                    <a href="{% url 'profile' comment.user.id %}" onclick="event.stopPropagation()" class="comment-username text-blue-400 hover:underline italic">@{{ comment.user }}</a>
-                                {% else %}
-                                    <span class="text-gray-400 comment-username italic">@Anonymous</span>
-                                {% endif %}
-                                <h3 class="comment-time text-sm text-gray-500 italic">{{ comment.time_ago }}</h3>
-                            </div>
-                            <h1 class="comment-content ml-3">{{ comment.content }}</h1>
-                        </div>
+                        {% include 'partials/postComments.html' %}
                     {% endfor %}
                 </div>
 
                 <div id="post-buttons-container" class="flex gap-4 items-center justify-between mt-4">
-                        <form class="like-form flex items-center" action="{% url 'like' post.id %}" method="post">
-                            {% csrf_token %}
-                            {% if user.is_authenticated %}
-                                <button class="cursor-pointer flex items-center p-0 border-none" type="submit" onclick="event.stopPropagation();">
-                                    {% if user in post.likers.all %}
-                                        <img class="h-6 w-6 self-start" src="../../static/icons/hearted.svg" alt="Unlike">
-                                    {% else %}
-                                        <img class="opacity-60 hover:opacity-100 h-6 w-6 self-start" src="../../static/icons/heart.svg" alt="Like">
-                                    {% endif %}
-                                </button>
-                            {% else %}
-                                <button class="cursor-not-allowed opacity-50 flex items-center p-0 border-none" type="button" onclick="alert('You must be logged in to like posts!')">
-                                    <img class="opacity-50 h-6 w-6 self-start" src="../../static/icons/heart.svg" alt="Like">
-                                </button>
-                            {% endif %}
 
-                            <!-- Display Liked Users -->
-                            {% if post.likers.all %}
-                                <span class="text-sm opacity-40 ml-1">
-                                    {{post.likers.count}}
-                                </span>
-                                <span class="w-[400px] text-gray-400 ml-3 mr-4 overflow-hidden text-ellipsis whitespace-nowrap block">
-                                    {% for liker in post.likers.all %}
-                                        <a href="{% url 'profile' liker.id %}" class="text-blue-400 hover:underline italic">@{{ liker }}</a>
-                                    {% endfor %}
-                                </span>
-                            {% endif %}
-                        </form>
+                    <form class="like-form flex items-center" action="{% url 'like' post.id %}" >
+                        {% csrf_token %}
+                        {% if user.is_authenticated %}
+                            <button class="cursor-pointer flex items-center p-0 border-none" type="submit" onclick="event.stopPropagation();">
+                                {% if user in post.likers.all %}
+                                    <img class="h-6 w-6" src="../../static/icons/hearted.svg" alt="Unlike">
+                                {% else %}
+                                    <img class="h-6 w-6 opacity-60 hover:opacity-100" src="../../static/icons/heart.svg" alt="Like">
+                                {% endif %}
+                            </button>
+                        {% else %}
+                            <button class="cursor-not-allowed opacity-50 flex items-center p-0 border-none" type="button" onclick="alert('You must be logged in to like posts!')">
+                                <img class="opacity-50 h-6 w-6 self-start" src="../../static/icons/heart.svg" alt="Like">
+                            </button>
+                        {% endif %}
+
+                        <!-- Display Liked Users -->
+                        {% if post.likers.all %}
+                            <span class="text-sm opacity-40 ml-1">
+                                {{post.likers.count}}
+                            </span>
+                            <span class="w-[400px] text-gray-400 ml-3 mr-4 overflow-hidden text-ellipsis whitespace-nowrap block">
+                                {% for liker in post.likers.all %}
+                                    <a href="{% url 'profile' liker.id %}" class="text-blue-400 hover:underline italic" onclick="event.stopPropagation()">@{{ liker }}</a>
+                                {% endfor %}
+                            </span>
+                        {% endif %}
+                    </form>
 
                     <div class="flex">
-                        <button class="mr-2 opacity-60 hover:opacity-100 cursor-pointer flex items-center border-none" onclick="event.stopPropagation(); alert('Share!');">
+                        <a href="{% url 'post' post.id %}" class="mr-3 opacity-60 hover:opacity-100 cursor-pointer flex items-center border-none" onclick="event.stopPropagation();">
                             <img class="h-5 w-5" src="../../static/icons/share.svg" alt="Share">
-                        </button>
+                        </a>
                         {% if user.is_authenticated %}
                             <button id="comment-button" class="comment-button opacity-60 hover:opacity-100 cursor-pointer flex items-center border-none">
                                 <img class="h-5 w-5" src="../../static/icons/comment.svg" alt="Comment">
@@ -108,10 +100,10 @@
                     </div>
                 </div>
 
-                <form id="comment-form" class="comment-form"  style="display: none;" action="{% url 'comment' post.id %}" method="post">
+                <form id="{{ post.id }}" class="comment-form" style="display: none;"  action="{% url 'comment' post.id %}">
                     {% csrf_token %} 
                     <textarea rows="1" id="comment-area" class="comment-area" placeholder="@{{user}}'s making comment..." name="content" required></textarea>
-                    <button class="py-1 px-2 mb-[2px]" type="submit">Post</button>
+                    <button id="post-btn" class="py-1 px-2 mb-[2px]" type="submit" disabled>Post</button>
                 </form>          
             </div>
         {% endfor %}
@@ -120,14 +112,118 @@
     
 {% endif %}
 
-
 {% if page_obj.has_next %}
     <div id="load-more-trigger"
         hx-get="{% url 'get_posts' %}?page={{ page_obj.next_page_number }}"
         hx-trigger="intersect once"
         hx-target="#posts"
         hx-swap="beforeend"
-        hx-on="htmx:afterRequest: if (!this.parentElement.innerHTML.includes('More posts')) { this.remove(); }">
     </div>
 {% endif %}
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("submit", function (event) {
+            // handle like
+            const likeForm = event.target.closest(".like-form");
+            if (likeForm) {
+                event.preventDefault(); // Prevent default form submission
+
+                const formData = new FormData(likeForm);
+                const url = likeForm.getAttribute("action");
+
+                fetch(url, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const likeButton = likeForm.querySelector("button");
+                        const likeImage = likeButton.querySelector("img");
+                        const likeCount = likeForm.querySelector("span.text-sm");
+
+                        // Toggle like/unlike images
+                        if (data.liked) {
+                            likeImage.src = "../../static/icons/hearted.svg";
+                            likeImage.classList.remove("opacity-60");
+                        } else {
+                            likeImage.src = "../../static/icons/heart.svg";
+                            likeImage.classList.add("opacity-60");
+                        }
+
+                        // Update like count
+                        likeCount.textContent = data.like_count;
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+            }
+
+            // handle comment
+            const commentForm = event.target.closest(".comment-form");
+            if (commentForm) {
+                event.preventDefault();
+
+                const postId = commentForm.id;
+
+                const commentArea = commentForm.querySelector(".comment-area");
+                const post_btn = commentForm.querySelector("#post-btn");
+                
+                const overlay_content = commentForm.closest(".overlay-content");
+                const post = document.querySelector(`.post[id="${postId}"]`);
+
+                console.log('overlay_content element:', overlay_content)
+                console.log('post element:', post)
+
+                const overlayComments = overlay_content.querySelector(".comments");
+                const postComments = post.querySelector(".comments");
+                const url = commentForm.getAttribute("action");
+
+                const formData = new FormData(commentForm);
+                const content = commentArea.value.trim();
+
+                if (!content) {
+                    event.preventDefault(); // Prevent form submission
+                    alert("Comment cannot be empty or only spaces!"); // Show warning
+                }          
+
+                fetch(url, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {           
+                        
+                        // Create new comment element
+                        const newComment = document.createElement("div");
+                        newComment.classList.add("comment");
+
+                        newComment.innerHTML = `
+                            <div class="flex items-center gap-1">
+                                <a href="/profile/${data.user_id}" class="comment-username text-blue-400 hover:underline italic">@${data.username}</a>
+                                <h3 class="comment-time text-sm text-gray-500 italic">${data.time_ago}</h3>
+                            </div>
+                            <h1 class="comment-content ml-3">${data.content}</h1>
+                        `;
+
+                        // Append new comment
+                        overlayComments.appendChild(newComment);
+                        postComments.appendChild(newComment.cloneNode(true)); 
+
+                        // Clear textarea
+                        commentForm.querySelector("textarea").value = "";
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+            }
+        });
+    });
+
+</script>

@@ -6,7 +6,7 @@
        Make New Post
     </h1>
 
-    <form id="newPost-form" class="posts item p-6" action="{% url 'post' %}" method="post">
+    <form id="newPost-form" class="posts item p-6" action="{% url 'createPost' %}" method="post">
         {% csrf_token %}
         <a href="{% url 'profile' user.id %}" onclick="event.stopPropagation()" class="post-username text-xl font-bold text-blue-400 hover:underline italic">@{{ user.username }}</a>
         <textarea placeholder="What do you want to share???" 
@@ -17,18 +17,33 @@
             autofocus
             style="min-height: 100px;"></textarea>
         <div class="flex justify-end">
-            <button type="submit" class="bg-blue-600 hover:bg-blue-500 border-none px-2 py-1 text-lg">Post</button>
+            <button type="submit" class="bg-blue-600 border-none px-2 py-1 text-lg" disabled>Post</button>
         </div>
     </form>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // pass content from pop up post form
             const urlParams = new URLSearchParams(window.location.search);
             const content = urlParams.get("content"); // Get 'content' from URL
         
             if (content) {
                 document.getElementById("newPost-input").value = content; // Insert into textarea
             }
+
+            const textarea = document.getElementById("newPost-input");
+            const postButton = document.querySelector("button[type='submit']");
+
+            // Function to enable/disable the button
+            function toggleButton() {
+                postButton.disabled = textarea.value.trim() === "";
+            }
+
+            // Add event listener for input changes
+            textarea.addEventListener("input", toggleButton);
+
+            // Check for pre-filled content (if any)
+            toggleButton();
         });
     </script>
         
